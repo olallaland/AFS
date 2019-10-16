@@ -1,4 +1,6 @@
-package applicaiotn;
+package blockControl;
+
+import fileControl.Id;
 
 interface Block {
 	Id getIndexId();

@@ -1,4 +1,4 @@
-package applicaiotn;
+package fileControl;
 
 public interface File {
 	int MOVE_CURR = 0; 

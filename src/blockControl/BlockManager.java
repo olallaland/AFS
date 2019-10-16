@@ -1,4 +1,6 @@
-package applicaiotn;
+package blockControl;
+
+import fileControl.Id;
 
 interface BlockManager {
 	Block getBlockId(Id indexId);

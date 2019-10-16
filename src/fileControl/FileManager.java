@@ -1,4 +1,4 @@
-package applicaiotn;
+package fileControl;
 
 public interface FileManager {
 	File getFile(Id fileId);
