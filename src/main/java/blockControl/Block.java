@@ -1,6 +1,6 @@
-package blockControl;
+package main.java.blockControl;
 
-import fileControl.Id;
+import main.java.fileControl.Id;
 
 interface Block {
 	Id getIndexId();

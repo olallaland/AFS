@@ -1,4 +1,4 @@
-package fileControl;
+package main.java.fileControl;
 
 public interface File {
 	int MOVE_CURR = 0; 

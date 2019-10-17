@@ -1,4 +1,4 @@
-package fileControl;
+package main.java.fileControl;
 
 class FMID implements Id {
 	//count每次从文件读取

@@ -1,4 +1,4 @@
-package fileControl;
+package main.java.fileControl;
 
 import java.util.LinkedList;
 
@@ -6,6 +6,7 @@ public class FileMeta {
 	int fileSize;
 	int blockSize;
 	int blockCount;
+	FileID fileId;
 	Block[][] logicBlocks;
 	
 	FileMeta(int fileSize) {
