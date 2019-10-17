@@ -1,9 +1,12 @@
 package main.java.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.Arrays;
 
 import main.java.constant.InfoConstant;
 import main.java.constant.FileConstant;
@@ -42,7 +45,7 @@ public class FileUtil {
 	
 	public static boolean exsits(String filename) {
 		String target = filename + FileConstant.FILEMETA_SUFFIX;
-		System.out.println(target);
+		//System.out.println(target);
 		File fmFolder = new File(FileConstant.FM_CWD);
 		File[] files = fmFolder.listFiles();
 		for(File f : files) {                //±éÀúFile[]Êý×é
@@ -51,7 +54,7 @@ public class FileUtil {
                 for(File sf : subFiles) {
                 	
                 	String tempFile = sf.getName();
-                	System.out.println(tempFile);
+                	//System.out.println(tempFile);
                 	if(tempFile.equals(target)) {
                 		return true;
                 	}
@@ -64,4 +67,5 @@ public class FileUtil {
 		return false;
 	}
 	
+		
 }

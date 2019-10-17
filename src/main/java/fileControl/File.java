@@ -1,5 +1,6 @@
 package main.java.fileControl;
 
+
 public interface File {
 	int MOVE_CURR = 0; 
 	int MOVE_HEAD = 1;

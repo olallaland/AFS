@@ -1,6 +1,7 @@
 package main.java.fileControl;
 
-public class FileImpl implements File {
+
+class FileImpl implements File {
 	
 	@Override
 	public Id getFileId() {

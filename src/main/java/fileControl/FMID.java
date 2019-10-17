@@ -1,5 +1,7 @@
 package main.java.fileControl;
 
+import main.java.fileControl.Id;
+
 class FMID implements Id {
 	//count每次从文件读取
 	private static int count = 0;

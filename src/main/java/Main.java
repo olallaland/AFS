@@ -8,7 +8,7 @@ import main.java.util.FileUtil;
 
 
 public class Main {
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Exception {
 		System.out.println("Start to use ¦Á-FileSystem...");
 		while(true) {
 			System.out.print("AFS>");

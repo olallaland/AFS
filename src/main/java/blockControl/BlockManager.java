@@ -1,7 +1,5 @@
 package main.java.blockControl;
 
-import main.java.fileControl.Id;
-
 interface BlockManager {
 	Block getBlockId(Id indexId);
 	Block newBlock(byte[] b);

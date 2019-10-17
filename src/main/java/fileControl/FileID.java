@@ -1,6 +1,10 @@
 package main.java.fileControl;
 
-public class FileID implements Id {
+import java.io.Serializable;
+
+import main.java.fileControl.Id;
+
+public class FileID implements Id, Serializable {
 	private FMID fmID;
 	private String filename;
 	
@@ -8,6 +12,7 @@ public class FileID implements Id {
 		this.filename = filename;
 	}
 	
+	@Override
 	public String toString() {
 		return filename;
 	}
