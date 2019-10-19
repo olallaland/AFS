@@ -2,8 +2,13 @@ package main.java.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
+import main.java.constant.FileConstant;
 
 public class SerializeUtil {
 	/**  
@@ -26,7 +31,7 @@ public class SerializeUtil {
             objectOutputStream.writeObject(out);
             //得 到 序列化字节
             byte[] bytes = byteArrayOutputStream.toByteArray();
-
+     
             //清空输出流
             objectOutputStream.flush();
             //释放资源
@@ -43,15 +48,16 @@ public class SerializeUtil {
 	    * 反序列化
 	    * */
 
-	    public static  <T> T deserialize(byte[] bytes,Class<T> clazz){
+	    public static  <T> T deserialize(Class<T> clazz, byte[] content){
 	       //字节数组
+	
 	        ByteArrayInputStream byteArrayInputStream = null;
 	        try{
 	            //将 得到的序列化字节 丢进 缓冲区
-	            byteArrayInputStream = new ByteArrayInputStream(bytes);
+	            byteArrayInputStream = new ByteArrayInputStream(content);
 	            //反序列化流 （输入流）--> 表示着从 一个 源头 读取 数据 ， （读取 缓冲区中 的字节）
 	            ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-	            //反序化成 一个对象
+	
 	            return (T)objectInputStream.readObject();
 	        }catch (Exception e){
 	            System.out.println("出现异常:"+e.getMessage());

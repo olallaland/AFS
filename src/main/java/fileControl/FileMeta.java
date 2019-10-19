@@ -1,6 +1,8 @@
 package main.java.fileControl;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import main.java.blockControl.BlockImpl;
@@ -10,10 +12,13 @@ import main.java.util.SerializeUtil;
 
 public class FileMeta implements Serializable {
 	int fileSize;
-	int blockSize;
-	int blockCount;
+	int blockSize = FileConstant.BLOCK_SIZE;
+	int blockCount = 0;
+	String fmId;
+	String path;
 	Id fileId;
-	BlockImpl[][] logicBlocks = new BlockImpl[100][100];
+	HashMap<Integer, LinkedList<BlockImpl>> logicBlocks = new HashMap<Integer, LinkedList<BlockImpl>>();
+	//BlockImpl[][] logicBlocks = new BlockImpl[100][100];//可以改用数组+链表
 	private static final long serialVersionUID = -5248069984631225347L;
 	
 	FileMeta(int fileSize) {
@@ -21,34 +26,45 @@ public class FileMeta implements Serializable {
 		blockCount = (fileSize % blockSize) == 0 ? fileSize / blockSize : fileSize / blockSize + 1;
 		for(int i = 0; i < blockCount; i++) {
 			for(int j = 0; j < fenpeisuanfa(); j++) {
-				logicBlocks[i][j] = new BlockImpl(" "); //这几个block的内容相同
+				//logicBlocks[i][j] = new BlockImpl(" "); //这几个block的内容相同
 			}
 			
 		}
 	}
-	FileMeta(Id fileId) {
+	FileMeta(Id fileId, String fmId) {
 		this.fileId = fileId;
+		this.fmId = fmId;
 		this.fileSize = 0;
-		this.blockSize = 0;
-		this.blockCount = 0;
-		logicBlocks[0][0] = new BlockImpl("blockk111");
-		System.out.println(fileId.toString());
-//		String destFilename = "fm" + FileConstant.PATH_SEPARATOR + fmId +
-//				FileConstant.PATH_SEPARATOR + fileId.toString() + FileConstant.FILEMETA_SUFFIX;
-//		FileUtil.createFile(destFilename);
+		this.blockCount = (fileSize % blockSize) == 0
+				? (fileSize / blockSize) : (fileSize / blockSize + 1);
+		this.path = FileConstant.FM_CWD + FileConstant.PATH_SEPARATOR + fmId +
+				FileConstant.PATH_SEPARATOR + fileId.toString() + FileConstant.META_SUFFIX;
+		LinkedList<BlockImpl> blocks = new LinkedList<BlockImpl>();
+		blocks.add(new BlockImpl("0"));
+		blocks.add(new BlockImpl("00"));
+		logicBlocks.put(0, blocks);
+		FileUtil.createFile(path);
+		try {
+			write(null);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		read();
 	}
 	
-	public int write() throws Exception {
-		
+	public int write(FileData data) throws Exception {
 		byte[] bytes = SerializeUtil.toBytes(this);
-		System.out.println("bytes: ....");
-		for(int i = 0; i < bytes.length; i++) {
-			System.out.println(bytes[i]);
-		}
-		FileMeta deserialize = SerializeUtil.deserialize(bytes, FileMeta.class);
-		System.out.println(deserialize);
+		FileUtil.writes(bytes, path);
+		//System.out.println(SerializeUtil.toBytes(this, path));
 		return 0;
 		//FileUtil.write();
+	}
+	
+	public void read() {
+	
+		FileMeta deserialize = SerializeUtil.deserialize(FileMeta.class,FileUtil.reads(path));
+		System.out.println(deserialize);
 	}
 	
 	int fenpeisuanfa() {
@@ -62,13 +78,15 @@ public class FileMeta implements Serializable {
                 ", filesize = '" + fileSize + '\'' +
                 ", blockSize = " + blockSize +
                 ", blockCount = " + blockCount + 
+                ", path = " + path +
                 '}';
-		for(int i = 0; i < logicBlocks[0].length; i++) {
-			for(int j = 0; j < logicBlocks.length; j++) 
-				if(logicBlocks[i][j] != null) {
-					str += "\n" + logicBlocks[i][j].name;
-				}
+		for(Integer i : logicBlocks.keySet()) {
+			LinkedList<BlockImpl> block = logicBlocks.get(i);
+			for(int j = 0; j < block.size(); j++) {
+				str += "\n" + (block.get(j).name);
+			}
 		}
+
         return str;
     }
 

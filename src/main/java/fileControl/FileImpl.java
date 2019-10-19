@@ -2,17 +2,20 @@ package main.java.fileControl;
 
 
 class FileImpl implements File {
+	String fileData;
+	FileMeta fileMeta;
 	
+	public FileImpl(FileMeta fileMeta) {
+		this.fileMeta = fileMeta;
+	}
 	@Override
 	public Id getFileId() {
-		// TODO Auto-generated method stub
-		return null;
+		return fileMeta.fileId;
 	}
 
 	@Override
 	public FileManager getFileManager() {
-		// TODO Auto-generated method stub
-		return null;
+		return new FileManagerImpl(fileMeta.fmId);
 	}
 
 	@Override
