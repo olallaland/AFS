@@ -1,6 +1,8 @@
 package main.java.blockControl;
 
-public class BlockId implements Id {
+import java.io.Serializable;
+
+public class BlockId implements Id, Serializable {
 	int index;
 	public BlockId(int index) {
 		this.index = index;

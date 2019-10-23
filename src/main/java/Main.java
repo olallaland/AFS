@@ -3,6 +3,7 @@ package main.java;
 import java.io.IOException;
 import java.util.Scanner;
 
+import main.java.application.CatFileCmd;
 import main.java.application.Command;
 import main.java.application.CreateFileCmd;
 import main.java.application.WriteFileCmd;
@@ -42,7 +43,11 @@ public class Main {
 					break;
 					
 				case "alpha-cat" :
-					System.out.println("get file content");
+					try {
+						cmd = new CatFileCmd(inputCmd);
+					} catch(RuntimeException e) {
+						System.out.println(e);	
+					}
 					break;
 					
 				case "alpha-hex" :

@@ -21,16 +21,15 @@ public class FileMeta implements Serializable {
 	//BlockImpl[][] logicBlocks = new BlockImpl[100][100];//可以改用数组+链表
 	private static final long serialVersionUID = -5248069984631225347L;
 	
-	FileMeta(int fileSize) {
-		this.fileSize = fileSize;
-		blockCount = (fileSize % blockSize) == 0 ? fileSize / blockSize : fileSize / blockSize + 1;
-		for(int i = 0; i < blockCount; i++) {
-			for(int j = 0; j < fenpeisuanfa(); j++) {
-				//logicBlocks[i][j] = new BlockImpl(" "); //这几个block的内容相同
-			}
-			
-		}
-	}
+//	FileMeta(int fileSize) {
+//		this.fileSize = fileSize;//		blockCount = (fileSize % blockSize) == 0 ? fileSize / blockSize : fileSize / blockSize + 1;
+//		for(int i = 0; i < blockCount; i++) {
+//			for(int j = 0; j < fenpeisuanfa(); j++) {
+//				//logicBlocks[i][j] = new BlockImpl(" "); //这几个block的内容相同
+//			}
+//			
+//		}
+//	}
 	FileMeta(Id fileId, String fmId) {
 		this.fileId = fileId;
 		this.fmId = fmId;
@@ -40,12 +39,10 @@ public class FileMeta implements Serializable {
 		this.path = FileConstant.FM_CWD + FileConstant.PATH_SEPARATOR + fmId +
 				FileConstant.PATH_SEPARATOR + fileId.toString() + FileConstant.META_SUFFIX;
 		LinkedList<BlockImpl> blocks = new LinkedList<BlockImpl>();
-		blocks.add(new BlockImpl("0"));
-		blocks.add(new BlockImpl("00"));
 		logicBlocks.put(0, blocks);
 		FileUtil.createFile(path);
 		try {
-			write(null);
+			write();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -53,7 +50,23 @@ public class FileMeta implements Serializable {
 		read();
 	}
 	
-	public int write(FileData data) throws Exception {
+	public void setFileSize(int fileSize) {
+		this.fileSize = fileSize;
+	}
+	
+	public void setBlockCount(int blockCount) {
+		this.blockCount = blockCount;
+	}
+	
+	public String getPath() {
+		return this.path;
+	}
+	
+	public int getFileSize() {
+		return fileSize;
+	}
+	
+	public int write() throws Exception {
 		byte[] bytes = SerializeUtil.toBytes(this);
 		FileUtil.writes(bytes, path);
 		//System.out.println(SerializeUtil.toBytes(this, path));
@@ -75,19 +88,33 @@ public class FileMeta implements Serializable {
     public String toString() {
 		String str = "FileMeta{" +
                 "fileId = " + fileId +
-                ", filesize = '" + fileSize + '\'' +
+                ", filesize = " + fileSize +
                 ", blockSize = " + blockSize +
                 ", blockCount = " + blockCount + 
                 ", path = " + path +
                 '}';
 		for(Integer i : logicBlocks.keySet()) {
 			LinkedList<BlockImpl> block = logicBlocks.get(i);
+			str += "\n" + i;
 			for(int j = 0; j < block.size(); j++) {
-				str += "\n" + (block.get(j).name);
+				str += ": [" + (block.get(j).getIndexId()) + ", " + block.get(j).getBlockManager() + "]" ;
 			}
 		}
 
         return str;
     }
+	
+	public int setLogicBlocks(int index, LinkedList<BlockImpl> list) {
+		
+		System.out.println(index + ", " + list.get(0).getIndexId());
+		logicBlocks.put(index, list);
+		
+		return 0;
+	}
+
+	public HashMap<Integer, LinkedList<BlockImpl>> getLogicBlocks() {
+		// TODO Auto-generated method stub
+		return this.logicBlocks;
+	}
 
 }

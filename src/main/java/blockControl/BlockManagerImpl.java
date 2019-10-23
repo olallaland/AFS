@@ -1,16 +1,21 @@
 package main.java.blockControl;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import main.java.util.FileUtil;
 
-public class BlockManagerImpl implements BlockManager {
+public class BlockManagerImpl implements BlockManager, Serializable {
 	String bmId;
-	HashMap<Id, BlockImpl> blockSet;
+	HashMap<Id, BlockImpl> blockSet = new HashMap<Id, BlockImpl>();
 	
 	public BlockManagerImpl(String bmId) {
 		this.bmId = bmId;
+		// TODO Auto-generated constructor stub
+	}
+
+	public BlockManagerImpl() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -23,7 +28,7 @@ public class BlockManagerImpl implements BlockManager {
 	@Override
 	public Block newBlock(byte[] b) {
 		int count = 0;
-		BlockImpl block;
+		BlockImpl block = new BlockImpl("null");
 		try {
 			count = FileUtil.readIdCount();
 			block = new BlockImpl(new BlockId(count), this, b);
@@ -34,15 +39,20 @@ public class BlockManagerImpl implements BlockManager {
 			FileUtil.updateIdCount(count);			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			System.out.println("read countÊ±³ö´í: " + e1);
 		}
 		
-		return null;
+		return block;
 	}
 	
 	public int addBlock(BlockImpl b) {
 		blockSet.put(b.getIndexId(), b);
 		return 0;
+	}
+	
+	@Override
+	public String toString() {
+		return this.bmId;
 	}
 
 }

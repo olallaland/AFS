@@ -9,4 +9,6 @@ public class FileConstant {
 	public static final String PATH_SEPARATOR = "/";
 	public static final int BLOCK_SIZE = 8;
 	public static final String ID_COUNT_PATH = "data/bm/id.count";
+	public static final int BM_COUNT = 10;
+	public static final int FM_COUNT = 8;
 }

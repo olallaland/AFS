@@ -7,6 +7,10 @@ import main.java.constant.FileConstant;
 import main.java.util.FileUtil;
 
 public class BlockImpl implements Block, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3560344460655349302L;
 	public String name;
 	Id blockId;
 	BlockManagerImpl bm;
@@ -16,6 +20,10 @@ public class BlockImpl implements Block, Serializable {
 	
 	public BlockImpl(String name) {
 		this.name = name;
+		StringBuilder tempPath = new StringBuilder();
+//		FileUtil.exists(name + FileConstant.DATA_SUFFIX, tempPath);
+//		System.out.println(tempPath);
+//		this.path = tempPath.toString().substring(0, tempPath.length() - 5);
 	}
 	public BlockImpl(BlockId id, BlockManagerImpl bm, byte[] blockData) {
 		this.blockId = id;
@@ -23,24 +31,34 @@ public class BlockImpl implements Block, Serializable {
 		this.path = FileConstant.BM_CWD + FileConstant.PATH_SEPARATOR + bm.bmId +
 				FileConstant.PATH_SEPARATOR + blockId.toString();
 		this.blockData = blockData;
-		this.blockMeta = new BlockMeta(getCheckSum());
+		this.blockMeta = new BlockMeta(checkSum(blockData));
 	}
 	@Override
 	public Id getIndexId() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO Auto-generated metod stub
+		return blockId;
 	}
 
 	@Override
 	public BlockManager getBlockManager() {
 		// TODO Auto-generated method stub
-		return null;
+		return bm;
+	}
+	
+	public String getPath() {
+		return this.path;
+	}
+	
+	public boolean isValid() {
+		String dataPath = this.path + FileConstant.DATA_SUFFIX;
+		byte[] tempContent = FileUtil.reads(dataPath);
+		return blockMeta.getCheckSum() == checkSum(tempContent);
 	}
 
 	@Override
 	public byte[] read() {
 		// TODO Auto-generated method stub
-		return null;
+		return FileUtil.reads(this.path + FileConstant.DATA_SUFFIX);
 	}
 
 	@Override
@@ -59,7 +77,7 @@ public class BlockImpl implements Block, Serializable {
 			FileUtil.writes(blockData, path + FileConstant.DATA_SUFFIX);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("写BlockData时发生错误：" + e);
 		}
 		return 0;
 	}
@@ -69,12 +87,12 @@ public class BlockImpl implements Block, Serializable {
 			blockMeta.write(path + FileConstant.META_SUFFIX);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("写BlockMeta时发生错误：" + e);
 		}
 		return 0;
 	}
 	
-	long getCheckSum() {
+	long checkSum(byte[] content) {
 		long number = blockData.length;
 		long temp = Long.parseLong("1821349192381");
 		for(byte b : blockData) {

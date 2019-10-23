@@ -7,8 +7,10 @@ import main.java.fileControl.FileManagerImpl;
 
 public abstract class Command {
 	
-	public static HashMap<String, BlockManagerImpl> currBlockManagers;
-	public static HashMap<String, FileManagerImpl> currFileManagers;
+	public static HashMap<String, BlockManagerImpl> currBlockManagers = 
+			new HashMap<String, BlockManagerImpl>();
+	public static HashMap<String, FileManagerImpl> currFileManagers = 
+			new HashMap<String, FileManagerImpl>();
 	Command(String cmdName, String filename) {
 		
 	}

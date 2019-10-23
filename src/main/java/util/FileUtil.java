@@ -1,8 +1,10 @@
 package main.java.util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,8 +54,8 @@ public class FileUtil {
         }
     }
 	
-	public static boolean exists(String filename, StringBuilder path) {
-		String target = filename + FileConstant.META_SUFFIX;
+	public static boolean exists(String target, StringBuilder path) {
+		//String target = filename + FileConstant.META_SUFFIX;
 		//System.out.println(target);
 		File fmFolder = new File(FileConstant.FM_CWD);
 		File[] files = fmFolder.listFiles();
@@ -65,8 +67,8 @@ public class FileUtil {
                 	String tempFile = sf.getName();
                 	//System.out.println(tempFile);
                 	if(tempFile.equals(target)) {
-                		path = new StringBuilder(sf + "");
-                		//System.out.println(path);
+                		path.append(sf + "");
+                		System.out.println(path);
                 		return true;
                 	}
                 }
@@ -79,7 +81,9 @@ public class FileUtil {
 	}
 	
 	public static void writes(byte[] bytes, String destFilePath) throws IOException {
-		 //创建源
+		createFile(destFilePath);
+		System.out.println("this is a file writes: " + destFilePath); 
+		//创建源
         File dest = new File(destFilePath);//目的地，新文件
         //src字节数组已经存在
         //选择流
@@ -112,12 +116,52 @@ public class FileUtil {
     
 	}
 	
+	public static void writeInBinary(byte[] bytes, String destFilePath) {
+		createFile(destFilePath);
+		System.out.println("this is a file writes in Binary: " + destFilePath); 
+		//创建源
+        File dest = new File(destFilePath);//目的地，新文件
+        //src字节数组已经存在
+        //选择流
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream os = null;
+        InputStream is = null;//ByteArrayInputStream的父类
+        //OutputStream os = null;
+        //操作
+        try {
+            is = new ByteArrayInputStream(bytes);//字节数组与程序之间的管道
+            os = new DataOutputStream(
+                    new BufferedOutputStream(new FileOutputStream(
+                    		destFilePath)));
+            //os = new DataOutputStream(dest);//程序与新文件之间的管道
+            //一样的字节数组缓冲操作
+            byte[] flush = new byte[1024*10];
+            int len = -1;
+                while((len = is.read(flush)) != -1) {
+                    os.write(flush,0,len);
+                }
+                os.flush();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if(null != os) {//关闭文件流
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+	}
+	
 	public static byte[] reads(String targetFilename) {
 		//创建源与目的地
         File src = new File(targetFilename);//获得文件的源头，从哪开始传入(源)
         byte[] dest = null;//最后在内存中形成的字节数组(目的地)
         //选择流
-        InputStream is = null;//此流是文件到程序的输入流
+        InputStream is = null;//此	流是文件到程序的输入流
         ByteArrayOutputStream baos= null;//此流是程序到新文件的输出流
         //操作(输入操作)
         try {
