@@ -80,6 +80,32 @@ public class FileUtil {
 		return false;
 	}
 	
+	public static boolean blockExists(String target, StringBuilder path) {
+		//String target = filename + FileConstant.META_SUFFIX;
+		//System.out.println(target);
+		File fmFolder = new File(FileConstant.BM_CWD);
+		File[] files = fmFolder.listFiles();
+		for(File f : files) {                //±éÀúFile[]Êý×é
+            if (f.isDirectory()) {  
+                File[] subFiles = f.listFiles();
+                for(File sf : subFiles) {
+                	
+                	String tempFile = sf.getName();
+                	//System.out.println(tempFile);
+                	if(tempFile.equals(target)) {
+                		path.append(sf + "");
+                		System.out.println(path);
+                		return true;
+                	}
+                }
+            }
+            if(f.isFile()) {
+            	//
+            }
+        }
+		return false;
+	}
+	
 	public static void writes(byte[] bytes, String destFilePath) throws IOException {
 		createFile(destFilePath);
 		System.out.println("this is a file writes: " + destFilePath); 

@@ -3,6 +3,6 @@ package main.java.fileControl;
 import main.java.fileControl.Id;
 
 public interface FileManager {
-	File getFile(Id fileId);
+	File getFile(Id fileId) throws Exception;
 	File newFile(Id fileId) throws Exception;
 }

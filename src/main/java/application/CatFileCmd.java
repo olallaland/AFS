@@ -41,7 +41,7 @@ public class CatFileCmd extends Command {
 		//2. 根据得到的FileMeta创建file对象获得文件FileData
 		System.out.println(fileMeta);
 		FileImpl file = new FileImpl(fileMeta);
-		byteContent = file.read(fileMeta.getFileSize());
+		byteContent = file.read((int)fileMeta.getFileSize());
 		
 		try {
 			fileData = new String(byteContent, "utf-8");

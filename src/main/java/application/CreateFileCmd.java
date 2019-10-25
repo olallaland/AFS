@@ -23,7 +23,7 @@ public class CreateFileCmd extends Command {
 			throw new RuntimeException("file exsits");
 		} else {
 			//查询分配的fm对象是否已创建
-		
+			fm = new FileManagerImpl(allocFm());
 			FileID fileId = new FileID(filename);
 			try {
 				fm.newFile(fileId);
@@ -55,6 +55,10 @@ public class CreateFileCmd extends Command {
 		} catch(RuntimeException e) {
 			System.out.println("allocate fm error: " + e);
 		}
+		
+		System.out.println("choose a fm :" + fmId);
 		return fmId;
 	}
+	
+	
 }

@@ -60,9 +60,13 @@ public class WriteFileCmd extends Command {
 		//2. 若是用户指令输入无误，根据用户输入的filename查找到对应的fileMeta文件
 		//并将其内容反序列化，生成对应的fileMeta对象
 		filename = cmds[1];
+		//这一步移到fileManager里面
+		
 		FileMeta fileMeta = findFile(filename);
 		System.out.println(fileMeta);
-		FileImpl file = new FileImpl(fileMeta);
+		FileManagerImpl fm = getFmById(fileMeta.getFmId());
+		FileImpl file = (FileImpl) fm.getFile(fileMeta.getFileId());
+		file.setFileMeta(fileMeta);
 		file.move(offset, where);
 		file.write(content.getBytes("utf-8"));
 		
@@ -154,6 +158,25 @@ public class WriteFileCmd extends Command {
 		} else {
 			throw new RuntimeException(filename + ": file not exists");
 		}
+	}
+	
+	//根据fmId获得FileManager对象
+	static FileManagerImpl getFmById(String fmId) {
+		FileManagerImpl fm = null;
+		try {
+			if(currFileManagers.containsKey(fmId)) {
+				fm = currFileManagers.get(fmId);
+				System.out.println("not new fm !!!");
+			} else {
+				fm = new FileManagerImpl(fmId);
+				System.out.println("new fm !!!");
+				currFileManagers.put(fmId, fm);
+			}
+		} catch(RuntimeException e) {
+			System.out.println("find fm error: " + e);
+		}
+			
+		return fm;
 	}
 
 }

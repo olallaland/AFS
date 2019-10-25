@@ -5,7 +5,10 @@ import java.util.Scanner;
 
 import main.java.application.CatFileCmd;
 import main.java.application.Command;
+import main.java.application.CopyFileCmd;
 import main.java.application.CreateFileCmd;
+import main.java.application.ReadBlockInHexCmd;
+import main.java.application.ReadFileCmd;
 import main.java.application.WriteFileCmd;
 import main.java.util.FileUtil;
 
@@ -49,13 +52,29 @@ public class Main {
 						System.out.println(e);	
 					}
 					break;
+				
+				case "alpha-read" :
+					try {
+						cmd = new ReadFileCmd(inputCmd);
+					} catch(RuntimeException e) {
+						System.out.println(e);
+					}
+					break;
 					
 				case "alpha-hex" :
-					System.out.println("print blockData in hex");
+					try {
+						cmd = new ReadBlockInHexCmd(inputCmd);
+					} catch(RuntimeException e) {
+						System.out.println(e);
+					}
 					break;
 				
 				case "alpha-copy" :
-					System.out.println("copy file");
+					try {
+						cmd = new CopyFileCmd(inputCmd);
+					} catch(RuntimeException e) {
+						System.out.println(e);
+					}
 					break;
 				
 				case "exit" :
