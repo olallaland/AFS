@@ -1,16 +1,17 @@
 package main.java;
 
-import java.io.IOException;
 import java.util.Scanner;
 
 import main.java.application.CatFileCmd;
 import main.java.application.Command;
 import main.java.application.CopyFileCmd;
 import main.java.application.CreateFileCmd;
+import main.java.application.HelpCmd;
 import main.java.application.ReadBlockInHexCmd;
 import main.java.application.ReadFileCmd;
+import main.java.application.SetFileSizeCmd;
 import main.java.application.WriteFileCmd;
-import main.java.util.FileUtil;
+import main.java.exception.ErrorCode;
 
 
 public class Main {
@@ -25,7 +26,7 @@ public class Main {
 //				System.out.println(inputCmd[i] + ",");
 //			}
 			Command cmd;
-			if(inputCmd.length == 0 || inputCmd[0] == "\n") {
+			if(inputCmd[0].equals("")) {
 				//do nothing
 			} else {
 				switch(inputCmd[0]) {
@@ -33,7 +34,7 @@ public class Main {
 					try {
 						cmd = new CreateFileCmd(inputCmd);
 					} catch(RuntimeException e) {
-						System.out.println(e);
+						System.out.println(e.getMessage());
 					}
 					break;
 				
@@ -41,7 +42,7 @@ public class Main {
 					try {
 						cmd = new WriteFileCmd(inputCmd);
 					} catch(RuntimeException e) {
-						System.out.println(e);
+						System.out.println(e.getMessage());
 					}
 					break;
 					
@@ -49,7 +50,7 @@ public class Main {
 					try {
 						cmd = new CatFileCmd(inputCmd);
 					} catch(RuntimeException e) {
-						System.out.println(e);	
+						System.out.println(e.getMessage());	
 					}
 					break;
 				
@@ -57,7 +58,15 @@ public class Main {
 					try {
 						cmd = new ReadFileCmd(inputCmd);
 					} catch(RuntimeException e) {
-						System.out.println(e);
+						System.out.println(e.getMessage());
+					}
+					break;
+					
+				case "alpha-sfs" :
+					try {
+						cmd = new SetFileSizeCmd(inputCmd);
+					} catch(RuntimeException e) {
+						System.out.println(e.getMessage());
 					}
 					break;
 					
@@ -65,7 +74,7 @@ public class Main {
 					try {
 						cmd = new ReadBlockInHexCmd(inputCmd);
 					} catch(RuntimeException e) {
-						System.out.println(e);
+						System.out.println(e.getMessage());
 					}
 					break;
 				
@@ -73,16 +82,24 @@ public class Main {
 					try {
 						cmd = new CopyFileCmd(inputCmd);
 					} catch(RuntimeException e) {
-						System.out.println(e);
+						System.out.println(e.getMessage());
 					}
 					break;
 				
+				case "help" :
+					try {
+						cmd = new HelpCmd(inputCmd);
+					} catch(RuntimeException e) {
+						System.out.println(e.getMessage());
+					}
+					break;
+					
 				case "exit" :
 					System.exit(0);
 					break;
 					
 				default :
-					System.out.println(inputCmd[0] + ": command not found");
+					System.out.println(inputCmd[0] + ": " + ErrorCode.getErrorText(10));
 					break;
 				}
 			}

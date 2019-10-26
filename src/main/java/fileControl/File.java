@@ -1,5 +1,6 @@
 package main.java.fileControl;
 
+import main.java.id.Id;
 
 public interface File {
 	int MOVE_CURR = 0; 

@@ -1,6 +1,6 @@
 package main.java.fileControl;
 
-import main.java.fileControl.Id;
+import main.java.id.Id;
 
 public interface FileManager {
 	File getFile(Id fileId) throws Exception;

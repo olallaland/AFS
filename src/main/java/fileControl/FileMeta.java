@@ -2,11 +2,11 @@ package main.java.fileControl;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-
 import main.java.blockControl.BlockImpl;
 import main.java.constant.FileConstant;
+import main.java.id.Id;
+import main.java.id.StringId;
 import main.java.util.FileUtil;
 import main.java.util.SerializeUtil;
 
@@ -14,7 +14,7 @@ public class FileMeta implements Serializable {
 	long fileSize;
 	int blockSize = FileConstant.BLOCK_SIZE;
 	int blockCount = 0;
-	private String fmId;
+	Id fmId;
 	String path;
 	Id fileId;
 	HashMap<Integer, LinkedList<BlockImpl>> logicBlocks = new HashMap<Integer, LinkedList<BlockImpl>>();
@@ -24,18 +24,18 @@ public class FileMeta implements Serializable {
 	public FileMeta() {
 	}
 	
-	FileMeta(Id fileId, String fmId) {
+	FileMeta(Id fileId, Id fmId) {
 		this.fileId = fileId;
-		this.setFmId(fmId);
+		this.fmId = fmId;
 		this.fileSize = 0;
 		this.blockCount = (int) ((fileSize % blockSize) == 0
 				? (fileSize / blockSize) : (fileSize / blockSize + 1));
+		this.path = setPath(fmId, fileId);
 		FileUtil.createFile(path);
 		try {
 			write();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 		read();
 	}
@@ -60,8 +60,13 @@ public class FileMeta implements Serializable {
 		return this.blockCount;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
+	public String setPath(Id fmId, Id fileId) {
+		String newPath = "";
+		
+		newPath = FileConstant.FM_CWD + FileConstant.PATH_SEPARATOR + getStringFmId() +
+				FileConstant.PATH_SEPARATOR + getStringFileId() + FileConstant.META_SUFFIX;
+				
+		return newPath;
 	}
 
 	public void setLogicBlocks(HashMap<Integer, LinkedList<BlockImpl>> logicBlocks) {
@@ -76,20 +81,41 @@ public class FileMeta implements Serializable {
 	/**
 	 * @return the fmId
 	 */
-	public String getFmId() {
+	public Id getFmId() {
 		return this.fmId;
+	}
+	
+	public String getStringFmId() {
+		if(fmId instanceof StringId) {
+			StringId sid = (StringId) fmId;
+			String id = sid.getId();
+			return id;
+		} else {
+			//TODO
+			return "";
+		}
 	}
 
 	/**
 	 * @param fmId the fmId to set
 	 */
-	public void setFmId(String fmId) {
+	public void setFmId(Id fmId) {
 		this.fmId = fmId;
 	}
 
 	public Id getFileId() {
-		// TODO Auto-generated method stub
 		return this.fileId;
+	}
+	
+	public String getStringFileId() {
+		if(fileId instanceof StringId) {
+			StringId sid = (StringId) fileId;
+			String id = sid.getId();
+			return id;
+		} else {
+			//TODO
+			return "";
+		}
 	}
 
 	public void setFileId(Id fileId) {
@@ -98,8 +124,7 @@ public class FileMeta implements Serializable {
 	 
 	
 	public int write() throws Exception {
-		setPath(FileConstant.FM_CWD + FileConstant.PATH_SEPARATOR + fmId +
-				FileConstant.PATH_SEPARATOR + fileId.toString() + FileConstant.META_SUFFIX);
+		this.path = setPath(fmId, fileId);
 		byte[] bytes = SerializeUtil.toBytes(this);
 		FileUtil.writes(bytes, path);
 		//System.out.println(SerializeUtil.toBytes(this, path));
@@ -115,7 +140,7 @@ public class FileMeta implements Serializable {
 	@Override
     public String toString() {
 		String str = "FileMeta{" +
-                "fileId = " + fileId +
+                "fileId = " + getStringFileId() +
                 ", filesize = " + fileSize +
                 ", blockSize = " + blockSize +
                 ", blockCount = " + blockCount + 
@@ -125,7 +150,7 @@ public class FileMeta implements Serializable {
 			LinkedList<BlockImpl> block = logicBlocks.get(i);
 			str += "\n" + i;
 			for(int j = 0; j < block.size(); j++) {
-				str += ": [" + (block.get(j).getIndexId()) + ", " + block.get(j).getBlockManager() + "]" ;
+				str += ": [" + (block.get(j).getIntegerBlockId()) + ", " + block.get(j).getStringBmId() + "]" ;
 			}
 		}
 

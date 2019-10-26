@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import main.java.constant.FileConstant;
+import main.java.id.IntegerId;
+import main.java.id.StringId;
+import main.java.id.Id;
 import main.java.util.FileUtil;
 
 public class BlockImpl implements Block, Serializable {
@@ -13,36 +16,47 @@ public class BlockImpl implements Block, Serializable {
 	private static final long serialVersionUID = 3560344460655349302L;
 	public String name;
 	Id blockId;
-	BlockManagerImpl bm;
+	Id bmId;
 	BlockMeta blockMeta;
 	byte[] blockData;
 	String path;
 	
-	public BlockImpl(String name) {
-		this.name = name;
-		StringBuilder tempPath = new StringBuilder();
-//		FileUtil.exists(name + FileConstant.DATA_SUFFIX, tempPath);
-//		System.out.println(tempPath);
-//		this.path = tempPath.toString().substring(0, tempPath.length() - 5);
+	public BlockImpl() {
+
 	}
-	public BlockImpl(BlockId id, BlockManagerImpl bm, byte[] blockData) {
+	public BlockImpl(IntegerId id, Id bmId, byte[] blockData) {
 		this.blockId = id;
-		this.bm = bm;
-		this.path = FileConstant.BM_CWD + FileConstant.PATH_SEPARATOR + bm.bmId +
-				FileConstant.PATH_SEPARATOR + blockId.toString();
+		this.bmId = bmId;
+		this.path = FileConstant.BM_CWD + FileConstant.PATH_SEPARATOR + getStringBmId() +
+				FileConstant.PATH_SEPARATOR + getIntegerBlockId();
 		this.blockData = blockData;
 		this.blockMeta = new BlockMeta(checkSum(blockData));
 	}
 	@Override
 	public Id getIndexId() {
-		// TODO Auto-generated metod stub
 		return blockId;
 	}
-
-	@Override
-	public BlockManager getBlockManager() {
-		// TODO Auto-generated method stub
-		return bm;
+	
+	public Integer getIntegerBlockId() {
+		if(blockId instanceof IntegerId) {
+			IntegerId sid = (IntegerId) blockId;
+			int id = sid.getId();
+			return id;
+		} else {
+			//TODO
+			return 0;
+		}
+	}
+	
+	public String getStringBmId() {
+		if(bmId instanceof StringId) {
+			StringId sid = (StringId) bmId;
+			String id = sid.getId();
+			return id;
+		} else {
+			//TODO
+			return "";
+		}
 	}
 	
 	public String getPath() {
@@ -51,7 +65,19 @@ public class BlockImpl implements Block, Serializable {
 	
 	public boolean isValid() {
 		String dataPath = this.path + FileConstant.DATA_SUFFIX;
-		byte[] tempContent = FileUtil.reads(dataPath);
+		byte[] tempContent = null;
+		try {
+			tempContent = FileUtil.reads(dataPath);
+		} catch(RuntimeException e) {
+			System.out.println(e.getMessage());
+		}
+		if(blockMeta.getCheckSum() == checkSum(tempContent)) {
+			System.out.println(blockMeta.getCheckSum());
+			System.out.println(checkSum(tempContent));
+			System.out.println("block " + getIntegerBlockId() + " is valid");
+		} else {
+			System.out.println("block " + getIntegerBlockId() + " is invalid");
+		}
 		return blockMeta.getCheckSum() == checkSum(tempContent);
 	}
 
@@ -76,8 +102,7 @@ public class BlockImpl implements Block, Serializable {
 		try {
 			FileUtil.writes(blockData, path + FileConstant.DATA_SUFFIX);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println("写BlockData时发生错误：" + e);
+			System.out.println(e.getMessage());
 		}
 		return 0;
 	}
@@ -86,22 +111,25 @@ public class BlockImpl implements Block, Serializable {
 		try {
 			blockMeta.write(path + FileConstant.META_SUFFIX);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("写BlockMeta时发生错误：" + e);
+			System.out.println(e.getMessage());
 		}
 		return 0;
 	}
 	
 	long checkSum(byte[] content) {
-		long number = blockData.length;
+		long number = content.length;
 		long temp = Long.parseLong("1821349192381");
-		for(byte b : blockData) {
+		for(byte b : content) {
 			long lb = (long)b;
 			number = ((number << 1) | (number >>> 63) |
 					 ((lb & 0xc3) << 41) | ((lb & 0xa7) << 12)) + 
 					 lb * 91871341 + temp;
 		}
 		return number;
+	}
+	@Override
+	public BlockManager getBlockManager() {
+		return new BlockManagerImpl(bmId);
 	}
 
 }

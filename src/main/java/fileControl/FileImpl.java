@@ -8,6 +8,8 @@ import main.java.application.WriteFileCmd;
 import main.java.blockControl.BlockImpl;
 import main.java.blockControl.BlockManagerImpl;
 import main.java.constant.FileConstant;
+import main.java.exception.ErrorCode;
+import main.java.id.Id;
 import main.java.util.FileUtil;
 
 public class FileImpl implements File {
@@ -39,7 +41,7 @@ public class FileImpl implements File {
 	public byte[] read(int length) {
 		System.out.println("用户读取操作的起始指针: " + pointer);
 		if(length + pointer > size()) {
-			throw new RuntimeException("read out of bound");
+			throw new ErrorCode(9);
 		}
 		//文件的所有字节
 		byte[] total = new byte[(int)size()];
@@ -51,20 +53,20 @@ public class FileImpl implements File {
 		for(Integer i : logicBlocks.keySet()) {
 			LinkedList<BlockImpl> duplicates = logicBlocks.get(i);
 			byte[] tempContent = null;
-			for(int j = 0; j < duplicates.size(); j++) {
-				BlockImpl block = duplicates.get(j);
+			while(duplicates.size() != 0) {
+				BlockImpl block = duplicates.get(0);
 				if(block.isValid()) {
 					tempContent = FileUtil.reads(block.getPath() + FileConstant.DATA_SUFFIX);
+					break;
 				} else {
-					duplicates.remove(j);
-					continue;
-				}	
-				tempContent = FileUtil.reads(block.getPath() + FileConstant.DATA_SUFFIX);	
+					duplicates.remove(0);
+				}
 			}
 			
 			//如果该logicBlock下的所有block都无效，那么为文件空洞
-			if(tempContent.length == 0) {
+			if(duplicates.size() == 0) {
 				tempContent = new byte[FileConstant.BLOCK_SIZE];
+				throw new ErrorCode(2);
 			}
 			//拼接每个block的内容
 			System.arraycopy(tempContent, 0, total, i * FileConstant.BLOCK_SIZE, tempContent.length);
@@ -72,6 +74,11 @@ public class FileImpl implements File {
 		System.arraycopy(total, (int) pointer, result, 0, length);
 		
 		move(length, 0);
+		try {
+			fileMeta.write();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		return result;
 	}
 
@@ -90,7 +97,6 @@ public class FileImpl implements File {
 		//在这种情况下，如果contentsize<filesize-pointer,那么还将剩余部分复制到content的末尾
 		long fileSize = fileMeta.fileSize;
 		HashMap<Integer, LinkedList<BlockImpl>> logicBlocks = fileMeta.getLogicBlocks();
-		LinkedList<BlockImpl> duplicates;
 		int blockCount = fileMeta.blockCount;
 		
 		/**
@@ -189,12 +195,7 @@ public class FileImpl implements File {
 	}
 	
 	void subWrite(byte[] bytes, int beginBlock, long totalFileSize) {
-		int position = 0;
-		String filename = "";
-		String content = "";
 		BlockManagerImpl bm;
-		int blockCount = fileMeta.blockCount;
-		long fileSize = fileMeta.fileSize;
 		
 		int newBlockCount = (bytes.length % FileConstant.BLOCK_SIZE) == 0
 				? (bytes.length / FileConstant.BLOCK_SIZE)
@@ -203,29 +204,33 @@ public class FileImpl implements File {
 		
 		for(int i = 0; i < newBlockCount; i++) {
 			LinkedList<BlockImpl> duplicates = new LinkedList<BlockImpl>();
-			byte[] temp;
+		
 			int begin = i * FileConstant.BLOCK_SIZE;
 			int end = (i + 1) * FileConstant.BLOCK_SIZE;
 			//System.out.println("copy begins at: " + begin + "\n ends at: " + end);
-			if(end > bytes.length) {
-				temp = Arrays.copyOfRange(bytes, begin, bytes.length);			
-			} else {
-				temp = Arrays.copyOfRange(bytes, begin, end);
-			}		
-			System.out.println("写入的字节: " + new String(temp));
-			bm = WriteFileCmd.allocBm();
-			BlockImpl block = (BlockImpl) bm.newBlock(temp);
-			try {
+			
+			//创建多个相同的副本
+			for(int j = 0; j < FileConstant.DUPLICATION_COUNT; j++) {
+				byte[] temp;
+				if(end > bytes.length) {
+					temp = Arrays.copyOfRange(bytes, begin, bytes.length);			
+				} else {
+					temp = Arrays.copyOfRange(bytes, begin, end);
+				}		
+				System.out.println("写入的字节: " + new String(temp));
+				bm = WriteFileCmd.allocBm();
+				System.out.println("in fileImpl creating block manager id: " + bm.getStringBmId());
+				BlockImpl block = (BlockImpl) bm.newBlock(temp);
+				
 				duplicates.add(block);
-				//修改fileMeta的logicBlock块
-				fileMeta.addLogicBlocks(i + beginBlock, duplicates);
-			} catch(Exception e) {
-				System.out.println("Add block to fileMeta error : " + e);
 			}
+			
+				fileMeta.addLogicBlocks(i + beginBlock, duplicates);
+			
 		}
 		
 		fileMeta.setFileSize(totalFileSize);
-		//这里有问题！！！
+		
 		fileMeta.setBlockCount((int) ((totalFileSize % FileConstant.BLOCK_SIZE) == 0
 				? (totalFileSize / FileConstant.BLOCK_SIZE)
 				: (totalFileSize / FileConstant.BLOCK_SIZE) + 1));
@@ -233,17 +238,15 @@ public class FileImpl implements File {
 		//4. 写入完成后，将fileMeta的内容写回对应文件
 		try {
 			fileMeta.write();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			System.out.println("写回filemeta时出错：" + e1);
+		} catch (Exception e1) {		
+			System.out.println(e1.getMessage());
 		}
 		
 		try {
 			
 			fileMeta.read();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("读取fileMeta时发生错误：" + e);
+		} catch (Exception e) {		
+			System.out.println(e.getMessage());
 		}
 
 	}
@@ -274,13 +277,27 @@ public class FileImpl implements File {
 
 	@Override
 	public long size() {
-		// TODO Auto-generated method stub
 		return fileMeta.fileSize;
 	}
 
 	@Override
 	public void setSize(long newSize) {
-		// TODO Auto-generated method stub
+		byte[] oldContent = read((int) fileMeta.fileSize);
+		byte[] newContent = new byte[(int) newSize];
+		long oldSize = oldContent.length;
+		int diff = (int) (newSize - oldSize);
+		
+		//原文件长度小于或等于新的长度，在后面加0x00
+		if(diff >= 0) {
+			System.arraycopy(oldContent, 0, newContent, 0, (int) oldSize);
+			for(int i = 0; i < diff; i++) {
+				newContent[(int) (oldSize + i)] = 0x00;
+			}
+		} else {
+			System.arraycopy(oldContent, 0, newContent, 0, (int) newSize);
+		}
+		fileMeta.logicBlocks.clear();
+		subWrite(newContent, 0, newSize);
 
 	}
 	public void setFileMeta(FileMeta fileMeta) {

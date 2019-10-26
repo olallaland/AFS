@@ -1,5 +1,5 @@
 package main.java.id;
 
-interface Id {
-	//empty interface 
+public interface Id {
+
 }

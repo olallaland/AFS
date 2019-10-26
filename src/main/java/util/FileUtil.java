@@ -1,10 +1,7 @@
 package main.java.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,15 +10,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.text.MessageFormat;
-import java.util.Arrays;
 
-import main.java.constant.InfoConstant;
 import main.java.constant.FileConstant;
+import main.java.constant.InfoConstant;
+import main.java.exception.ErrorCode;
 
 public class FileUtil {
 	public static int createFile(String destFilePath) { //destFilename = fm or bm + fm\bm id + filename
@@ -44,14 +38,13 @@ public class FileUtil {
             try {
                 if (file.createNewFile()) {             
                     return 1;
-                } else {
-                    throw new RuntimeException(MessageFormat.format(InfoConstant.FAILED_TO_CREATE_FILE, destFilePath));
                 }
+            
             } catch (IOException e) {
-                throw new RuntimeException(MessageFormat.format(InfoConstant.FAILED_TO_CREATE_FILE_REASON, destFilePath,
-                        e.getMessage()));
+                throw new ErrorCode(1);
             }
         }
+		return 0;
     }
 	
 	public static boolean exists(String target, StringBuilder path) {
@@ -127,21 +120,22 @@ public class FileUtil {
                 }
                 os.flush();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new ErrorCode(4);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ErrorCode(1);
         }finally {
             if(null != os) {//关闭文件流
                 try {
                     os.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new ErrorCode(1);
                 }
             }
         }
     
 	}
 	
+	/*
 	public static void writeInBinary(byte[] bytes, String destFilePath) {
 		createFile(destFilePath);
 		System.out.println("this is a file writes in Binary: " + destFilePath); 
@@ -168,19 +162,21 @@ public class FileUtil {
                 }
                 os.flush();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new ErrorCode(4);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ErrorCode(1);
         }finally {
             if(null != os) {//关闭文件流
                 try {
                     os.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                	throw new ErrorCode(1);
                 }
             }
         }
 	}
+	
+	*/
 	
 	public static byte[] reads(String targetFilename) {
 		//创建源与目的地
@@ -202,21 +198,20 @@ public class FileUtil {
             dest = baos.toByteArray();//最终获得的字节数组
             return dest;//返回baos在内存中所形成的字节数组
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        	throw new ErrorCode(4);
         } catch (IOException e) {
-            e.printStackTrace();
+        	throw new ErrorCode(1);
         }finally {
             //释放资源,文件需要关闭,字节数组流无需关闭
             if(null != is) {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                	throw new ErrorCode(1);
                 }
             }
             
         }
-        return null;
 	}
 	
 	public static int readIdCount() throws IOException {
@@ -253,8 +248,7 @@ public class FileUtil {
 				file.createNewFile();
 			
 			} catch (IOException e) {
-				throw new RuntimeException(MessageFormat.format(InfoConstant.FAILED_TO_CREATE_FILE_REASON,
-						FileConstant.ID_COUNT_PATH, e.getMessage()));
+				throw new ErrorCode(1);
 			}
 		}
 		output = new FileWriter(file);

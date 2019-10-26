@@ -4,15 +4,21 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import main.java.id.Id;
+import main.java.id.IntegerId;
+import main.java.id.StringId;
 import main.java.util.FileUtil;
 
 public class BlockManagerImpl implements BlockManager, Serializable {
-	String bmId;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6437111830025101381L;
+	Id bmId;
 	HashMap<Id, BlockImpl> blockSet = new HashMap<Id, BlockImpl>();
 	
-	public BlockManagerImpl(String bmId) {
-		this.bmId = bmId;
-		// TODO Auto-generated constructor stub
+	public BlockManagerImpl(Id bmId) {
+		this.bmId = bmId;	
 	}
 
 	public BlockManagerImpl() {
@@ -20,20 +26,31 @@ public class BlockManagerImpl implements BlockManager, Serializable {
 	}
 
 	@Override
-	public Block getBlockId(Id indexId) {
+	public Block getBlock(Id indexId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public String getStringBmId() {
+		if(bmId instanceof StringId) {
+			StringId sid = (StringId) bmId;
+			String id = sid.getId();
+			return id;
+		} else {
+			//TODO
+			return "";
+		}
 	}
 
 	@Override
 	public Block newBlock(byte[] b) {
 		int count = 0;
-		BlockImpl block = new BlockImpl("null");
+		BlockImpl block = new BlockImpl();
 		try {
 			count = FileUtil.readIdCount();
-			block = new BlockImpl(new BlockId(count), this, b);
+			block = new BlockImpl(new IntegerId(count), bmId, b);
 			block.write();
-			blockSet.put(new BlockId(count), block);
+			blockSet.put(new IntegerId(count), block);
 			
 			count++;
 			FileUtil.updateIdCount(count);			
@@ -48,11 +65,6 @@ public class BlockManagerImpl implements BlockManager, Serializable {
 	public int addBlock(BlockImpl b) {
 		blockSet.put(b.getIndexId(), b);
 		return 0;
-	}
-	
-	@Override
-	public String toString() {
-		return this.bmId;
 	}
 
 }

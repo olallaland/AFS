@@ -1,6 +1,5 @@
 package main.java.blockControl;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import main.java.constant.FileConstant;
@@ -25,7 +24,11 @@ public class BlockMeta implements Serializable{
 	
 	int write(String path) throws Exception {
 		byte[] bytes = SerializeUtil.toBytes(this);
-		FileUtil.writes(bytes, path);
+		try {
+			FileUtil.writes(bytes, path);
+		} catch(RuntimeException e) {
+			System.out.println(e.getMessage());
+		}
 		//System.out.println(SerializeUtil.toBytes(this, path));
 		return 0;
 	}

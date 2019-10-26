@@ -1,8 +1,14 @@
 package main.java.id;
 
-public class StringId implements Id {
+import java.io.Serializable;
+
+public class StringId implements Id, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5682627581288256691L;
 	private String id;
-	StringId(String id) {
+	public StringId(String id) {
 		this.id = id;
 	}
 	
