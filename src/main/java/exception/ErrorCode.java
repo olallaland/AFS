@@ -15,6 +15,13 @@ public class ErrorCode extends RuntimeException {
 	public static final int NUMBER_FORMAT_EXCEPTION = 8;
 	public static final int READ_OUT_OF_BOUND = 9;
 	public static final int COMMAND_NOT_FOUND = 10;
+	public static final int MOVE_POINTER_ERROR = 11;
+	public static final int FILE_META_LOSS = 12;
+	public static final int TYPE_CONVERSION_EXCEPTION = 13;
+	public static final int SERIALIZED_ERROR = 14;
+	public static final int BLOCK_INFORMATION_LOSS = 15;
+	public static final int FILE_HOLE_EXCEPTION = 16;
+	public static final int SET_FILE_SIZE_NEGATIVE = 17;
 	
 	public static final int UNKNOWN = 1000;
 	
@@ -27,9 +34,17 @@ public class ErrorCode extends RuntimeException {
 		ErrorCodeMap.put(BLOCK_NOT_EXIST, "block not exists exception");
 		ErrorCodeMap.put(UNSUPPORTED_ENCODING, "unsupported encoding exception");
 		ErrorCodeMap.put(INCORRECT_ARGUMENT_FORMAT, "incorrect arguments format");
-		ErrorCodeMap.put(NUMBER_FORMAT_EXCEPTION, "number format exception");
+		ErrorCodeMap.put(NUMBER_FORMAT_EXCEPTION, "number format exception when type casting");
 		ErrorCodeMap.put(READ_OUT_OF_BOUND, "read out of bound");
 		ErrorCodeMap.put(COMMAND_NOT_FOUND, "command not found");
+		ErrorCodeMap.put(MOVE_POINTER_ERROR, "move pointer error");
+		ErrorCodeMap.put(FILE_META_LOSS, "file meta loss");
+		ErrorCodeMap.put(TYPE_CONVERSION_EXCEPTION, "id type conversion exception");
+		ErrorCodeMap.put(SERIALIZED_ERROR, "serialize error");
+		ErrorCodeMap.put(BLOCK_INFORMATION_LOSS, "block data or meta loss");
+		ErrorCodeMap.put(FILE_HOLE_EXCEPTION, "file empty hole exception");
+		ErrorCodeMap.put(SET_FILE_SIZE_NEGATIVE, "set a negative length of the file");
+
 		
 		ErrorCodeMap.put(UNKNOWN, "unknown");
 	}

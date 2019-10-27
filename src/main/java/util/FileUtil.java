@@ -1,37 +1,32 @@
 package main.java.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.text.MessageFormat;
-
 import main.java.constant.FileConstant;
-import main.java.constant.InfoConstant;
 import main.java.exception.ErrorCode;
 
+import java.io.*;
+import java.util.LinkedList;
+
 public class FileUtil {
-	public static int createFile(String destFilePath) { //destFilename = fm or bm + fm\bm id + filename
-		System.out.println(destFilePath);
+    /**
+     * 根据文件的相对路径创建文件
+     * @param destFilePath
+     * @return
+     */
+	public static int createFile(String destFilePath) {
+
         File file = new File(destFilePath);
         if (file.exists()) {
-            return -1; //file exists 
+            //file exists
+            return -1;
         } else {
             if (destFilePath.endsWith(File.separator)) {
-                throw new RuntimeException(MessageFormat.format(InfoConstant.FILE_CANNOT_BE_DIR, destFilePath));
+                throw new ErrorCode(1);
             }
             // file exists?
             if (!file.getParentFile().exists()) {
                 //if the parent dir is not exist, then create it.
                 if (!file.getParentFile().mkdirs()) {
-                    throw new RuntimeException(InfoConstant.FAILED_CREAT_DIR);
+                    throw new ErrorCode(1);
                 }
             }
             // create target file.
@@ -46,11 +41,20 @@ public class FileUtil {
         }
 		return 0;
     }
-	
+
+    /**
+     * 根据文件的文件名找到其路径（文件名是唯一的）
+     * @param target
+     * @param path
+     * @return
+     */
 	public static boolean exists(String target, StringBuilder path) {
 		//String target = filename + FileConstant.META_SUFFIX;
 		//System.out.println(target);
 		File fmFolder = new File(FileConstant.FM_CWD);
+		if(!fmFolder.exists()) {
+		    new File(FileConstant.FM_CWD + FileConstant.PATH_SEPARATOR).mkdirs();
+        }
 		File[] files = fmFolder.listFiles();
 		for(File f : files) {                //遍历File[]数组
             if (f.isDirectory()) {  
@@ -61,7 +65,6 @@ public class FileUtil {
                 	//System.out.println(tempFile);
                 	if(tempFile.equals(target)) {
                 		path.append(sf + "");
-                		System.out.println(path);
                 		return true;
                 	}
                 }
@@ -72,7 +75,23 @@ public class FileUtil {
         }
 		return false;
 	}
-	
+
+    /**
+     * 根据文件的路径判断是否存在
+     * @param path
+     * @return
+     */
+	public static boolean exists(String path) {
+        File file = new File(path);
+        return file.exists();
+    }
+
+    /**
+     * 根据block的block id找到其路径（block id是唯一的）
+     * @param target
+     * @param path
+     * @return
+     */
 	public static boolean blockExists(String target, StringBuilder path) {
 		//String target = filename + FileConstant.META_SUFFIX;
 		//System.out.println(target);
@@ -87,7 +106,6 @@ public class FileUtil {
                 	//System.out.println(tempFile);
                 	if(tempFile.equals(target)) {
                 		path.append(sf + "");
-                		System.out.println(path);
                 		return true;
                 	}
                 }
@@ -98,21 +116,26 @@ public class FileUtil {
         }
 		return false;
 	}
-	
+
+    /**
+     * 将数据以字节流写入文件
+     * @param bytes
+     * @param destFilePath
+     * @throws IOException
+     */
 	public static void writes(byte[] bytes, String destFilePath) throws IOException {
 		createFile(destFilePath);
-		System.out.println("this is a file writes: " + destFilePath); 
 		//创建源
-        File dest = new File(destFilePath);//目的地，新文件
-        //src字节数组已经存在
+        File dest = new File(destFilePath);
+
         //选择流
-        InputStream is = null;//ByteArrayInputStream的父类
+        InputStream is = null;
         OutputStream os = null;
         //操作
         try {
-            is = new ByteArrayInputStream(bytes);//字节数组与程序之间的管道
-            os = new FileOutputStream(dest);//程序与新文件之间的管道
-            //一样的字节数组缓冲操作
+            is = new ByteArrayInputStream(bytes);
+            os = new FileOutputStream(dest);
+
             byte[] flush = new byte[1024*10];
             int len = -1;
                 while((len = is.read(flush)) != -1) {
@@ -124,7 +147,8 @@ public class FileUtil {
         } catch (IOException e) {
             throw new ErrorCode(1);
         }finally {
-            if(null != os) {//关闭文件流
+            //关闭文件流
+            if(null != os) {
                 try {
                     os.close();
                 } catch (IOException e) {
@@ -134,6 +158,53 @@ public class FileUtil {
         }
     
 	}
+
+    /**
+     * 按行写入文件
+     * @param path
+     * @param content
+     */
+    public static void writeByLine(String path, String content) {
+        try {
+            createFile(path);
+
+            FileWriter writer = new FileWriter(path, true);
+            writer.write(content + "\n");
+            writer.close();
+        } catch (IOException e) {
+            throw new ErrorCode(1);
+        }
+    }
+
+    /**
+     * 按行读取文件
+     * @param path
+     * @return
+     */
+    public static LinkedList<String> readByLine(String path) {
+
+        LinkedList<String> fileList = new LinkedList<String>();
+        File file = new File(path);
+        if(!file.exists()) {
+            return fileList;
+        }
+
+        try {
+            FileReader fr = new FileReader(path);
+            BufferedReader bf = new BufferedReader(fr);
+            String str;
+            // 按行读取字符串
+            while ((str = bf.readLine()) != null) {
+                fileList.add(str);
+            }
+            bf.close();
+            fr.close();
+        } catch (IOException e) {
+            throw new ErrorCode(1);
+        }
+
+        return fileList;
+    }
 	
 	/*
 	public static void writeInBinary(byte[] bytes, String destFilePath) {
@@ -177,31 +248,38 @@ public class FileUtil {
 	}
 	
 	*/
-	
+
+    /**
+     * 以字节流的方式读文件
+     * @param targetFilename
+     * @return
+     */
 	public static byte[] reads(String targetFilename) {
 		//创建源与目的地
-        File src = new File(targetFilename);//获得文件的源头，从哪开始传入(源)
-        byte[] dest = null;//最后在内存中形成的字节数组(目的地)
+        File src = new File(targetFilename);
+        byte[] dest = null;
         //选择流
-        InputStream is = null;//此	流是文件到程序的输入流
-        ByteArrayOutputStream baos= null;//此流是程序到新文件的输出流
+        InputStream is = null;
+        ByteArrayOutputStream baos= null;
         //操作(输入操作)
         try {
-            is = new FileInputStream(src);//文件输入流
-            baos = new ByteArrayOutputStream();//字节输出流，不需要指定文件，内存中存在
-            byte[] flush = new byte[1024*10];//设置缓冲，这样便于传输，大大提高传输效率
-            int len = -1;//设置每次传输的个数,若没有缓冲的数据大，则返回剩下的数据，没有数据返回-1
+            //文件输入流
+            is = new FileInputStream(src);
+            //字节输出流，不需要指定文件，内存中存在
+            baos = new ByteArrayOutputStream();
+            byte[] flush = new byte[1024 * 10];
+            int len = -1;
             while((len = is.read(flush)) != -1) {
-                baos.write(flush,0,len);//每次读取len长度数据后，将其写出
+                baos.write(flush,0,len);
             }
-            baos.flush();//刷新管道数据
-            dest = baos.toByteArray();//最终获得的字节数组
-            return dest;//返回baos在内存中所形成的字节数组
+            baos.flush();
+            dest = baos.toByteArray();
+            return dest;
         } catch (FileNotFoundException e) {
         	throw new ErrorCode(4);
         } catch (IOException e) {
         	throw new ErrorCode(1);
-        }finally {
+        } finally {
             //释放资源,文件需要关闭,字节数组流无需关闭
             if(null != is) {
                 try {
@@ -213,7 +291,12 @@ public class FileUtil {
             
         }
 	}
-	
+
+    /**
+     * 读取id.count 文件
+     * @return
+     * @throws IOException
+     */
 	public static int readIdCount() throws IOException {
 		File file = new File(FileConstant.ID_COUNT_PATH);
 		int ch;
@@ -224,14 +307,20 @@ public class FileUtil {
         		temp += (char)ch;
         	}
         	input.close();
-            System.out.println(temp);
-            return Integer.parseInt(temp); //file exsits 
+
+            return Integer.parseInt(temp);
         } else {
         	updateIdCount(1);
         	return 1;  	
         }
 	}
-	
+
+    /**
+     * 更新id.count 文件
+     * @param newValue
+     * @return
+     * @throws IOException
+     */
 	public static int updateIdCount(int newValue) throws IOException {
 		File file = new File(FileConstant.ID_COUNT_PATH);
 		FileWriter output;
@@ -240,7 +329,7 @@ public class FileUtil {
 			if (!file.getParentFile().exists()) {
 				// if the parent dir is not exist, then create it.
 				if (!file.getParentFile().mkdirs()) {
-					throw new RuntimeException(InfoConstant.FAILED_CREAT_DIR);
+					throw new ErrorCode(1);
 				}
 			}
 			// create target file.
@@ -257,5 +346,57 @@ public class FileUtil {
 		output.close();
 		return 0;
 	}
-		
+
+    /**
+     * delete a file
+     * @param path
+     */
+	public static void deleteFile(String path) {
+
+        File file = new File(path);
+        if(file.exists()) {
+
+            if(!file.delete()) {
+                throw new ErrorCode(1);
+            }
+        } else {
+            throw new ErrorCode(4);
+        }
+    }
+
+    /**
+     * delete a line in a file
+     * @param path
+     * @param line
+     */
+    public static void deleteLine(String path, String line) {
+
+        File file = new File(path);
+        FileWriter writer = null;
+        BufferedReader br = null;
+        StringBuffer temp = new StringBuffer();
+        String tempLine;
+        if(file.exists()) {
+            try {
+                FileReader fr = new FileReader(file);
+                br = new BufferedReader(fr);
+                while(br.ready()) {
+                    tempLine = br.readLine();
+                    if(!tempLine.equals(line)) {
+                        temp.append(tempLine + "\n");
+                    }
+                }
+
+                br.close();
+                writer = new FileWriter(file);
+                writer.write(temp.toString());
+                writer.close();
+            } catch (Exception e) {
+                throw new ErrorCode(1);
+            }
+        } else {
+            throw new ErrorCode(4);
+        }
+    }
+
 }
